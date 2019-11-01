@@ -1,7 +1,9 @@
-# Implemention of Abstract Data Type Vector - Basic Data Structure I
+# Implemention of Abstract Data Type Doubly Linked List - Basic Data Structure I
 ## About the project
-We focus on two aspects of the list: the core operations that should be supported, and the two different forms of organizing the data inside a list, using arrays(static or dynamic) or linked list (singly or doubly linked).
-In this initial programming project, we begin by introducing basic definition of terms, properties and operations. Next we provide details on implementing a list ADT with dynamic array.
+This project consist in the implementation of the list Abstract Data Type (ADT) based on a
+doubly linked list.
+We begin by introducing basic definition of terms, properties and operations. Next we provide
+details on the underlying data structure you should use to implement a list ADT.
 
 ## Compile and run
 In project root directory
@@ -14,13 +16,11 @@ In `build`
 $ make 
 
 ```
-To run driver test:
+To run driver test( developed by professor Selan Rodrigues ):
 ```bash
-$ ./vector_drive
+$ ./list_driver
 
 ```
-## Limitations
-`iterator insert( iterator pos, const T & value)`: In some cases the method can't insert element correctly. 
-
 ## Authorship
 [Tiago Onofre Araujo](https://github.com/OnofreTZK)
+[Rafael Fortunato](https://github.com/Obelixlelul)

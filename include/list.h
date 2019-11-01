@@ -404,6 +404,10 @@ namespace sc{ // sequence container.
                         runner = runner->next;
                     }
                 }
+/*----------------------------- End of iterators --------------------------------------*/
+
+
+
 /*-------------------------- Constructors & Destructor --------------------------------*/
                 // Default constructor.
                 list()

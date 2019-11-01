@@ -22,5 +22,5 @@ $ ./list_driver
 
 ```
 ## Authorship
-[Tiago Onofre Araujo](https://github.com/OnofreTZK)
-[Rafael Fortunato](https://github.com/Obelixlelul)
+* [Tiago Onofre Araujo](https://github.com/OnofreTZK)
+* [Rafael Fortunato](https://github.com/Obelixlelul)

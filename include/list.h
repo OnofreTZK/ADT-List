@@ -6,6 +6,8 @@
 #include <initializer_list> // std::initializer_list
 #include <cstdlib> // size_t
 #include <algorithm>
+#include <cassert>
+#include <exception>
 
 /* ALIAS */
 using size_type = size_t;
@@ -20,12 +22,16 @@ namespace sc{ // sequence container.
             private:
                 struct Node{
                     T data; //> value
-                    Node * next =nullptr; //> pointer to next node.
-                    Node * prev =nullptr; //> pointer to prev node.
+                    Node *next; //> pointer to next node.
+                    Node *prev; //> pointer to prev node.
+
+                    // default constructor
+                    Node( const T& d = T(), Node * n = nullptr, Node * p = nullptr ) : data( d ), next(n), prev(p)
+                { /* Empty */ }
                 };
 
-                Node * head; //> pointer to first/top node.
-                Node * tail; //> pointer to last/bottom node.
+                Node *head; //> pointer to first/top node.
+                Node *tail; //> pointer to last/bottom node.
                 size_type m_size;
 
 
@@ -41,6 +47,86 @@ namespace sc{ // sequence container.
                         Node * current;
 
                     public:
+
+                        /* ALIAS */
+                        typedef T& reference;
+                        typedef T* pointer;
+                        typedef T value_type;
+                        typedef std::bidirectional_iterator_tag iterator_category;
+                        typedef std::ptrdiff_t difference_type;
+
+                        // default constructors.
+                        iterator( Node * pt = nullptr ): current(pt)
+                        {/*Empty*/ }
+
+                        iterator(){}
+
+                        iterator( const iterator & it ): current( it.current )
+                        {/*Empty*/}
+
+                        // destructor.
+                        ~iterator() = default;
+
+                        /* Operations */
+                        // ++it
+                        iterator operator++(void)
+                        {
+                            current = current->next;
+                            return *this;
+                        }
+
+                        // it++
+                        iterator operator++(value_type)
+                        {
+                            iterator temp(current);
+                            current = current->next;
+                            return temp;
+                        }
+
+                        // --it
+                        iterator operator--(void)
+                        {
+                            current = current->prev;
+                            return *this;
+                        }
+
+                        // it--
+                        iterator operator--(value_type)
+                        {
+                            iterator temp(current);
+                            current = current->prev;
+                            return temp;
+                        }
+
+                        // *it
+                        reference operator*(void) const
+                        {
+                            return current->data;
+                        }
+
+                        // it == it2
+                        bool operator==( const iterator & rhs ) const
+                        {
+                            return this->current == rhs.current;
+                        }
+
+                        // it != it2
+                        bool operator!=( const iterator & rhs ) const
+                        {
+                            return this->current != rhs.current;
+                        }
+
+                        iterator & operator=( const iterator rhs )
+                        {
+                            current = rhs.current;
+
+                            return *this;
+                        }
+
+                        Node * getNode( void )
+                        {
+                            return current;
+                        }
 
 
 
@@ -58,6 +144,82 @@ namespace sc{ // sequence container.
 
                     public:
 
+                        /* ALIAS */
+                        typedef T& reference;
+                        typedef T* pointer;
+                        typedef T value_type;
+                        typedef std::bidirectional_iterator_tag iterator_category;
+                        typedef std::ptrdiff_t difference_type;
+
+
+                        // default constructors.
+                        const_iterator( const Node * pt = nullptr ): current(pt)
+                        {/*Empty*/ }
+
+                        const_iterator(){}
+
+                        const_iterator( const iterator & it ): current( it.current )
+                        {/*Empty*/}
+
+                        // destructor
+                        ~const_iterator() = default;
+
+                        /* Operations */
+
+                        // ++it
+                        const_iterator operator++(void)
+                        {
+                            current = current->next;
+                            return *this;
+                        }
+
+                        // it++
+                        const_iterator operator++(value_type)
+                        {
+                            const_iterator temp(current);
+                            current = current->next;
+                            return temp;
+                        }
+
+                        // --it
+                        const_iterator operator--(void)
+                        {
+                            current = current->prev;
+                            return *this;
+                        }
+
+                        // it--
+                        const_iterator operator--(value_type)
+                        {
+                            const_iterator temp(current);
+                            current = current->prev;
+                            return temp;
+                        }
+
+                        // *it
+                        const T& operator*(void) const
+                        {
+                            return current->data;
+                        }
+
+                        // it == it2
+                        bool operator==( const_iterator & rhs ) const
+                        {
+                            return this->current == rhs.current;
+                        }
+
+                        // it != it2
+                        bool operator!=( const_iterator & rhs ) const
+                        {
+                            return this->current != rhs.current;
+                        }
+
+                        const_iterator operator=( const iterator & rhs )
+                        {
+                              this->current = rhs.current;
+                        }
+
+
 
                 };
 /*=====================================================================================*/
@@ -65,33 +227,192 @@ namespace sc{ // sequence container.
 
                 iterator begin()
                 {
-                    return iterator(this->head);
+                    return iterator(head->next);
                 }
 
                 const_iterator cbegin() const
                 {
-                    return const_iterator(this->head);
+                    return const_iterator(head->next);
                 }
 
                 iterator end()
                 {
-                    return iterator(this->tail);
+                    return iterator(tail);
                 }
 
                 const_iterator cend() const
                 {
-                    return const_iterator(this->tail);
+                    return const_iterator(tail);
                 }
 /*=====================================================================================*/
 
 
+/*=====================================================================================*/
+//        Operations that require iterators
+/*=====================================================================================*/
+
+                // Adds value into the list before the position given by the iterator pos.
+                // The method returns an iterator to the position of the inserted item.
+                iterator insert( iterator pos, const T & value )
+                {
+
+                    Node * runner = head->next;
+
+                    while( runner->data != *pos )
+                    {
+                        runner = runner->next;
+                    }
+
+                    // create node
+                    Node * temp = new Node( value, runner );
+
+                    // link with prev element.
+                    temp->prev = runner->prev;
+
+                    temp->prev->next = temp;
+
+                    // link with next element.
+                    temp->next->prev = temp;
+
+                    m_size++;
+
+                    return temp;
+
+                }
+
+
+                // Insert elements from the range [first, last] before pos
+                template< typename InItr >
+                  iterator insert( iterator pos, InItr first, InItr last )
+                  {
+                      InItr runner = first;
+
+                      iterator temp = pos;
+
+                      while( runner != last )
+                      {
+                          temp = insert( pos, *runner++ );
+                      }
+
+                      return temp;
+                  }
+
+
+                // Insert elements from the initializer list `ilist` before pos.
+                // Initializer list supports the user of insert as in:
+                // myList.insert( pos, {1 ,2, 3, 4} ).
+                // Which would insert the elements 1, 2, 3 and 4 in the list before pos.
+                iterator insert( iterator pos, std::initializer_list<T> ilist )
+                {
+
+                    iterator it = pos;
+
+                    for( auto i : ilist )
+                    {
+                        it = insert( pos, i );
+                    }
+
+                    return it;
+                }
+
+
+                // Removes the object at position pos. 
+                // The method returns an iterator to the element that follows pos before
+                // the call. This operation invalidates pos, since the item pointed to
+                // was removed from the list.
+                iterator erase( iterator pos )
+                {
+                    // save node adress;
+                    Node * temp = pos.getNode();
+
+                    // get iterator
+                    iterator it = temp->next;
+
+                    // link around nodes;
+                    temp->prev->next = temp->next;
+                    temp->next->prev = temp->prev;
+
+                    delete[] temp; // remove
+
+                    m_size--;
+
+                    return it;
+
+                }
+
+
+                // Removes elements in the range [first, last]
+                // The entire list may be erased by calling a.erase( a.begin(), a.end() )
+                iterator erase( iterator first, iterator last )
+                {
+                    if( std::distance( first, last ) == m_size )
+                    {
+                        clear();
+                        return end();
+                    }
+
+                    iterator runner = first;
+                    iterator it = first;
+
+                    while( runner != last )
+                    {
+                        it = erase( runner++ );
+                    }
+
+                    return it;
+                }
+
+
+                // Replaces the contents with count copies of value
+                void assign( size_type count, const T & value )
+                {
+                    size_type aux = 0;
+
+                    Node * runner = head->next;
+
+                    while( aux < count )
+                    {
+                        runner->data = value;
+                        runner = runner->next;
+                    }
+                }
+
+
+                // Replaces the contents of the list with the elements
+                // copies of the element in the range [first, left]
+                template< typename InItr > 
+                  void assign( InItr first, InItr last )
+                  {
+                      Node * runner = head->next;
+
+                      while( first != last )
+                      {
+                          runner->data = *first;
+                          runner = runner->next;
+                          first++;
+                      }
+                  }
+
+
+                void assign( std::initializer_list<T> ilist )
+                {
+                    Node * runner = head->next;
+
+                    for( auto & i : ilist )
+                    {
+                        runner->data = i;
+                        runner = runner->next;
+                    }
+                }
 /*-------------------------- Constructors & Destructor --------------------------------*/
                 // Default constructor.
                 list()
                 {
                     /* empty list */
-                    head = tail;
-                    tail = head;
+                    head = new Node;
+                    tail = new Node;
+                    head->next = tail;
+                    tail->prev = head;
 
                     m_size = 0;
                 }
@@ -99,51 +420,62 @@ namespace sc{ // sequence container.
                 // Constructor with `count` times T().
                 explicit list( size_type count )
                 {
-                    size_type aux = 0; // count.
+                    size_type aux = 1; // count.
+
+                    m_size = 0;
 
                     // linking list
-                    head = tail;
-                    tail = head;
+                    head = new Node;
+                    tail = new Node;
+                    head->next = tail;
+                    tail->prev = head;
 
-
-                    while( aux < count )
+                    while( aux++ <= count )
                     {
-                        push_front( T() );
-                        aux++;
+                        push_back( T() );
                     }
 
-                    m_size = count;
                 }
 
                 // Constructor with the contents in range( first, last ).
                 template< typename InputIt >
                   list( InputIt first, InputIt last )
                   {
+                      m_size = 0;
+
                       // linking list
-                      head = tail;
-                      tail = head;
+                      head = new Node;
+                      tail = new Node;
+                      head->next = tail;
+                      tail->prev = head;
+
+                      InputIt firstpos = first;
 
                       while( first != last )
                       {
-                          push_front(*first);
+                          push_back(*first);
                           first++;
                       }
 
-                      m_size = std::distance( first, last );
+                      m_size = std::distance( firstpos, last );
                   }
 
                 // Constructs the list with the deep copy of contents of other.
                 list( const list& other )
                 {
-                      // linking list
-                      head = tail;
-                      tail = head;
+                      m_size = 0;
 
-                      Node * runner = other.head;
+                      // linking list
+                      head = new Node;
+                      tail = new Node;
+                      head->next = tail;
+                      tail->prev = head;
+
+                      Node * runner = other.head->next;
 
                       while( runner->next )
                       {
-                          push_front( runner->data );
+                          push_back( runner->data );
                           runner = runner->next;
                       }
 
@@ -153,15 +485,19 @@ namespace sc{ // sequence container.
                 // Constructor with initializer list
                 list( std::initializer_list<T> ilist )
                 {
+                      m_size = 0;
+
                       // linking list
-                      head = tail;
-                      tail = head;
+                      head = new Node;
+                      tail = new Node;
+                      head->next = tail;
+                      tail->prev = head;
 
                       size_type it = 0;
 
                       while( it < ilist.size() )
                       {
-                          push_front( *( ilist.begin() + it ) );
+                          push_back( *( ilist.begin() + it ) );
                           it++;
                       }
 
@@ -169,21 +505,28 @@ namespace sc{ // sequence container.
                 }
 
                 // Destructor;
-                ~list();
+                ~list()
+                {
+                    clear();
+                }
 
                 // Operator = overloading ===============================================
                 // Replace the contents with a copy of the contents of other.
                 list& operator=( const list& other )
                 {
-                      // linking list
-                      head = tail;
-                      tail = head;
+                      m_size = 0;
 
-                      Node * runner = other.head;
+                      // linking list
+                      head = new Node;
+                      tail = new Node;
+                      head->next = tail;
+                      tail->prev = head;
+
+                      Node * runner = other.head->next;
 
                       while( runner->next )
                       {
-                          push_front( runner->data );
+                          push_back( runner->data );
                           runner = runner->next;
                       }
 
@@ -195,15 +538,19 @@ namespace sc{ // sequence container.
                 // Repalce the contents with those identified by a initializer list.
                 list& operator=( std::initializer_list<T> ilist )
                 {
+                      m_size = 0;
+
                       // linking list
-                      head = tail;
-                      tail = head;
+                      head = new Node;
+                      tail = new Node;
+                      head->next = tail;
+                      tail->prev = head;
 
                       size_type it = 0;
 
                       while( it < ilist.size() )
                       {
-                          push_front( *( ilist.begin() + it ) );
+                          push_back( *( ilist.begin() + it ) );
                           it++;
                       }
 
@@ -230,21 +577,19 @@ namespace sc{ // sequence container.
                 }
 
                 // Return true if the container contains no elements, and false otherwise.
-                bool empty(){ return head == nullptr; }
+                bool empty(){ return head->next == tail; }
 
                 // Adds value to the front of the list.
                 void push_front( const T & value )
                 {
                     // Create node.
-                    Node * temp = new Node;
-
-                    // Put value and link to list.
-                    temp->data = value;
-                    temp->next = head;
-                    temp->prev = head->prev;
+                    Node * temp = new Node(value, head->next, head); // linked to head.
 
                     // link head.
-                    head = temp;
+                    head->next = temp;
+
+                    // link old front element with new one.
+                    temp->next->prev = temp;
 
                     m_size++;
                 }
@@ -253,15 +598,13 @@ namespace sc{ // sequence container.
                 void push_back( const T & value )
                 {
                     // Create node.
-                    Node * temp = new Node;
-
-                    // Put value and link to list.
-                    temp->data = value;
-                    temp->next = tail;
+                    Node * temp = new Node(value, tail);
+                    // link last element with new last one.
+                    tail->prev->next = temp;
+                    // link old last one
                     temp->prev = tail->prev;
-
-                    // link tail.
-                    tail = temp;
+                    // link new node to the tail.
+                    tail->prev = temp;
 
                     m_size++;
                 }
@@ -294,16 +637,28 @@ namespace sc{ // sequence container.
                     m_size--;
                 }
 
+                // print the list
+                void print()
+                {
+                    std::cout << "[ ";
+                    while( head != nullptr )
+                    {
+                        std::cout << head->data << " ";
+                        head = head->next;
+                    }
+                    std::cout << "]"; 
+                }
+
                 // Returns the object at the end of the list.
                 const T & back( void )
                 {
-                    return tail->data;
+                    return tail->prev->data;
                 }
 
                 // Returns the object at the beginning of the list.
                 const T & front( void )
                 {
-                    return head->data;
+                    return head->next->data;
                 }
 
                 // Replaces the content of the list with copies of value.
@@ -375,4 +730,26 @@ bool operator!=( const sc::list<T> & lhs, const sc::list<T> & rhs )
     else
         return true;
 }
+
+template< typename T >
+
+std::ostream& operator<<( std::ostream& stream, const sc::list<T>& list)
+{
+
+        stream << "[ ";
+
+        auto l = list.cbegin();
+
+        for (auto i = 0; i < list.size(); ++i)
+        {
+
+            std::cout << *l << " ";
+            ++l;
+        }
+
+        stream << "]";
+
+        return stream;
+}
+
 #endif

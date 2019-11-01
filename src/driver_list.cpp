@@ -1,6 +1,7 @@
 #include <iostream>  // cout, endl
 #include <cassert>   // assert()
-#include "list.h"
+#include <iterator>
+#include "../include/list.h"
 
 template < typename T = int >
 sc::list<T> createVec( const sc::list<T> & _v )
@@ -26,6 +27,7 @@ int main( void )
     {
         std::cout << ">>> Unit teste #" << ++n_unit << ": constructor(size).\n";
         sc::list<int> seq(10);
+        std::cout << seq.size() << "\n";
         assert( seq.size() == 10 );
         assert( seq.empty() == false );
         std::cout << ">>> Passed!\n\n";
@@ -351,7 +353,7 @@ int main( void )
 
         std::cout << ">>> Passed!\n\n";
     }
-/*
+
     {
         std::cout << ">>> Unit teste #" << ++n_unit << ": insert(pos, value).\n";
 
@@ -423,7 +425,7 @@ int main( void )
 
 
         std::cout << ">>> Passed!\n\n";
-    }
+    } 
 #ifdef IGNORE_THIS
 // This method has the same signature as the assign( InItr, InItr ) of InItr is an integral type.
 // So, we must block this for a while (until C++11).
@@ -516,6 +518,6 @@ int main( void )
 
         std::cout << ">>> Passed!\n\n";
     }
-*/
+
     return 0;
 }

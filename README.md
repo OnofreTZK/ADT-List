@@ -1,4 +1,4 @@
-# Implemention of Abstract Data Type Doubly Linked List - Basic Data Structure I
+# Implemention of std::list - Basic Data Structure I
 ## About the project
 This project consist in the implementation of the list Abstract Data Type (ADT) based on a
 doubly linked list.
